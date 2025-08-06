@@ -83,3 +83,15 @@ D:\TEST_MODEL\20250806\History.db
 - 내부 테이블 예시:
   - AlignInfos (AlignX, AlignY, AlignT)
   - ProductInfos (Judge, MaterialInputTime, ProcessingTimeMs)
+
+---
+
+## 📦 릴리즈 노트
+
+| 날짜         | 버전     | 주요 변경 내용                                                           |
+| ---------- | ------ | ------------------------------------------------------------------ |
+| 2025-08-06 | v1.0.0 | 초기 릴리즈: AlignInfos/ProductInfos 시각화, Dock 기반 UI, 데이터 표/차트 전환 기능 구현 |
+| 2025-08-07 | v1.1.0 | `AutoDate` 모드 개선, ProductInfos 그래프 업데이트 문제 수정, Zoom Reset 기능 추가    |
+| 2025-08-08 | v1.1.1 | 기존 DockWindow 재사용 기능 추가 (DatabaseView 클릭 시 새 창 생성 방지)              |
+| (예정)       | v1.2.0 | 생산량 기준 자동 X축 스케일링 기능 추가 예정                                         |
+
