@@ -1,4 +1,5 @@
 ﻿using BrightIdeasSoftware;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
@@ -233,7 +234,7 @@ namespace WindowsFormsApp1
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void ShowGraphDock(object sender, EventArgs e)
+        private void ShowGraphDock2(object sender, EventArgs e)
         {
             if (rightClickedNode == null) return;
 
@@ -328,6 +329,112 @@ namespace WindowsFormsApp1
                     }
 
                     var winP = new MyPDChartDockWindow(tableName, dateLabels, okCounts, ngCounts, start, end);
+                    winP.UpdateTitle(tableName, start, end);
+                    winP.Show(dockPanel1, DockState.Document);
+                }
+                else
+                {
+                    MessageBox.Show("이 항목은 그래프를 지원하지 않습니다.", "알림", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"[{tableName}] 그래프 생성 실패: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void ShowGraphDock(object sender, EventArgs e)
+        {
+            if (rightClickedNode == null) return;
+
+            string tableName = RemoveLeadingNonAlphanumeric(rightClickedNode.Text);
+            DateTime start = MC1.SelectionStart.Date;
+            DateTime end = MC1.SelectionEnd.Date;
+
+            // ✅ AutoDate 활성화 여부 결정
+            bool isSingleDay = start == end;
+            bool isToday = start == DateTime.Today;
+            bool autoUpdateDate = !(isSingleDay && !isToday); // 단일 날짜이면서 오늘이 아니면 false
+
+            try
+            {
+                List<DateTime> missingDates = new List<DateTime>();
+
+                if (tableName.Equals("AlignInfos", StringComparison.OrdinalIgnoreCase))
+                {
+                    var tables = new List<DataTable>();
+                    for (var d = start; d <= end; d = d.AddDays(1))
+                    {
+                        string path = GetDbPathForDate(d);
+                        if (!File.Exists(path))
+                        {
+                            missingDates.Add(d);
+                            continue;
+                        }
+                        tables.Add(LoadTableData(path, tableName));
+                    }
+
+                    if (missingDates.Any())
+                    {
+                        string msg = string.Join(", ", missingDates.Select(d => d.ToString("yyyy-MM-dd")));
+                        MessageBox.Show($"다음 날짜에 DB가 존재하지 않습니다: {msg}", "DB 누락", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+
+                    if (!tables.Any())
+                    {
+                        MessageBox.Show("선택된 기간에 AlignInfos 데이터가 없습니다.", "알림", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+
+                    var merged = MergeDataTables(tables);
+                    var winA = new MyChartDockWindow(tableName, merged, start, end, autoUpdateDate); // ✅ autoUpdateDate 전달
+                    winA.UpdateTitle(tableName, start, end);
+                    winA.Show(dockPanel1, DockState.Document);
+                }
+                else if (tableName.Equals("ProductInfos", StringComparison.OrdinalIgnoreCase))
+                {
+                    var dateLabels = new List<string>();
+                    var okCounts = new List<int>();
+                    var ngCounts = new List<int>();
+
+                    for (var d = start; d <= end; d = d.AddDays(1))
+                    {
+                        string path = GetDbPathForDate(d);
+                        if (!File.Exists(path))
+                        {
+                            missingDates.Add(d);
+                            continue;
+                        }
+
+                        using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={path}"))
+                        {
+                            conn.Open();
+                            using (var cmd = conn.CreateCommand())
+                            {
+                                cmd.CommandText = "SELECT COUNT(*) FROM ProductInfos WHERE Judge = 'OK'";
+                                int ok = Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
+                                cmd.CommandText = "SELECT COUNT(*) FROM ProductInfos WHERE Judge = 'NG'";
+                                int ng = Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
+
+                                dateLabels.Add(d.ToString("yyyy-MM-dd"));
+                                okCounts.Add(ok);
+                                ngCounts.Add(ng);
+                            }
+                        }
+                    }
+
+                    if (missingDates.Any())
+                    {
+                        string msg = string.Join(", ", missingDates.Select(d => d.ToString("yyyy-MM-dd")));
+                        MessageBox.Show($"다음 날짜에 DB가 존재하지 않습니다: {msg}", "DB 누락", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+
+                    if (!dateLabels.Any())
+                    {
+                        MessageBox.Show("선택된 기간에 ProductInfos 데이터가 없습니다.", "알림", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+
+                    var winP = new MyPDChartDockWindow(tableName, dateLabels, okCounts, ngCounts, start, end, autoUpdateDate); // ✅ autoUpdateDate 전달
                     winP.UpdateTitle(tableName, start, end);
                     winP.Show(dockPanel1, DockState.Document);
                 }
@@ -545,7 +652,7 @@ namespace WindowsFormsApp1
             {
                 conn.Open();
                 var cmd = conn.CreateCommand();
-                cmd.CommandText = $"SELECT * FROM [{tableName}] LIMIT 100";
+                cmd.CommandText = $"SELECT * FROM [{tableName}] ";
 
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -639,7 +746,7 @@ namespace WindowsFormsApp1
         }
         #endregion
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click2(object sender, EventArgs e)
         {
             // 랜덤 생성기
             Random rand = new Random();
@@ -671,39 +778,8 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-        //    Random rand = new Random();
 
-        //    string judge = rand.Next(2) == 0 ? "OK" : "NG";
-
-        //    // 시간 포맷은 yyyy-MM-dd HH:mm:ss 형식으로 현재 시간 기준 생성
-        //    string materialInputTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-        //    string processingTime = DateTime.Now.AddSeconds(rand.Next(1, 10)).ToString("yyyy-MM-dd HH:mm:ss");
-
-        //    using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath}"))
-        //    {
-        //        conn.Open();
-
-        //        using (var cmd = conn.CreateCommand())
-        //        {
-        //            cmd.CommandText = @"
-        //        INSERT INTO ProductInfos (Judge, MaterialInputTime, ProcessingTimeMs)
-        //        VALUES (@judge, @inputTime, @procTime);
-        //    ";
-
-        //            cmd.Parameters.AddWithValue("@judge", judge);
-        //            cmd.Parameters.AddWithValue("@inputTime", materialInputTime);
-        //            cmd.Parameters.AddWithValue("@procTime", processingTime);
-
-        //            cmd.ExecuteNonQuery();
-        //        }
-
-        //        MessageBox.Show($"ProductInfos 삽입 완료!\nJudge={judge}");
-        //    }
-        }
-
-        private void button2_Click_1(object sender, EventArgs e)
+        private void button2_Click2(object sender, EventArgs e)
         {
             Random rand = new Random();
 
@@ -735,10 +811,79 @@ namespace WindowsFormsApp1
             }
 
         }
-
-        private void button3_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
+            Random rand = new Random();
 
+            using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath}"))
+            {
+                conn.Open();
+
+                using (var tran = conn.BeginTransaction())
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                INSERT INTO AlignInfos (InspectionTime, AlignX, AlignY, AlignT)
+                VALUES (@time, @x, @y, @t);
+            ";
+
+                    var pTime = cmd.Parameters.Add("@time", SqliteType.Text);
+                    var pX = cmd.Parameters.Add("@x", SqliteType.Real);
+                    var pY = cmd.Parameters.Add("@y", SqliteType.Real);
+                    var pT = cmd.Parameters.Add("@t", SqliteType.Real);
+
+                    for (int i = 0; i < 9000; i++)
+                    {
+                        pTime.Value = DateTime.Now.AddSeconds(i).ToString("yyyy-MM-dd HH:mm:ss");
+                        pX.Value = Math.Round(rand.NextDouble() * 100, 2);
+                        pY.Value = Math.Round(rand.NextDouble() * 100, 2);
+                        pT.Value = Math.Round(rand.NextDouble() * 100, 2);
+
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    tran.Commit();
+                }
+
+                MessageBox.Show("✅ AlignInfos에 9000개 데이터 삽입 완료!");
+            }
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Random rand = new Random();
+
+            using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath}"))
+            {
+                conn.Open();
+
+                using (var tran = conn.BeginTransaction())
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                INSERT INTO ProductInfos (Judge, MaterialInputTime, ProcessingTimeMs)
+                VALUES (@judge, @inputTime, @procTime);
+            ";
+
+                    var pJudge = cmd.Parameters.Add("@judge", SqliteType.Text);
+                    var pInputTime = cmd.Parameters.Add("@inputTime", SqliteType.Text);
+                    var pProcTime = cmd.Parameters.Add("@procTime", SqliteType.Text);
+
+                    for (int i = 0; i < 9000; i++)
+                    {
+                        pJudge.Value = rand.Next(2) == 0 ? "OK" : "NG";
+                        pInputTime.Value = DateTime.Now.AddSeconds(i).ToString("yyyy-MM-dd HH:mm:ss");
+                        pProcTime.Value = DateTime.Now.AddSeconds(i + rand.Next(1, 10)).ToString("yyyy-MM-dd HH:mm:ss");
+
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    tran.Commit();
+                }
+
+                MessageBox.Show("✅ ProductInfos에 9000개 데이터 삽입 완료!");
+            }
+        }
+
     }
 }

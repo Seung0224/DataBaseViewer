@@ -67,9 +67,33 @@ namespace WindowsFormsApp1
 
             this.Controls.Add(chartArea);
 
+            InitSharedChartContextMenu();
+
             if (sourceTable != null)
             {
                 SetChartData(sourceTable);
+            }
+        }
+
+        private void InitSharedChartContextMenu()
+        {
+            ContextMenuStrip = new ContextMenuStrip();
+
+            ContextMenuStrip.Items.Add("Zoom Reset", null, OnZoomResetClicked);
+            
+            // 모든 차트에 메뉴 연결
+            chartX.ContextMenuStrip = ContextMenuStrip;
+            chartY.ContextMenuStrip = ContextMenuStrip;
+            chartT.ContextMenuStrip = ContextMenuStrip;
+        }
+        private void OnZoomResetClicked(object sender, EventArgs e)
+        {
+            if (ContextMenuStrip.SourceControl is LiveCharts.WinForms.CartesianChart chart)
+            {
+                chart.AxisX[0].MinValue = 1;
+                chart.AxisX[0].MaxValue = listX.Count;
+                chart.AxisY[0].MinValue = double.NaN;
+                chart.AxisY[0].MaxValue = double.NaN;
             }
         }
 

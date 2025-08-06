@@ -33,6 +33,8 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.TLV1 = new BrightIdeasSoftware.TreeListView();
             this.MC1 = new System.Windows.Forms.MonthCalendar();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TLV1)).BeginInit();
             this.SuspendLayout();
@@ -83,11 +85,33 @@
             this.MC1.Name = "MC1";
             this.MC1.TabIndex = 9;
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(1301, 205);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(132, 124);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(1301, 347);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(132, 124);
+            this.button2.TabIndex = 11;
+            this.button2.Text = "button2";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1260, 741);
+            this.ClientSize = new System.Drawing.Size(1481, 741);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.MC1);
             this.Controls.Add(this.TLV1);
             this.Controls.Add(this.tableLayoutPanel1);
@@ -107,6 +131,8 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private BrightIdeasSoftware.TreeListView TLV1;
         private System.Windows.Forms.MonthCalendar MC1;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
     }
 }
 
