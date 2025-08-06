@@ -83,9 +83,3 @@ D:\TEST_MODEL\20250806\History.db
 - 내부 테이블 예시:
   - AlignInfos (AlignX, AlignY, AlignT)
   - ProductInfos (Judge, MaterialInputTime, ProcessingTimeMs)
-
----
-## 👨‍💻 개발자
-
-- **Seung0224**  
-- GitHub: [https://github.com/Seung0224](https://github.com/Seung0224)
