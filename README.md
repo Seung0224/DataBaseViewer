@@ -5,7 +5,7 @@ SQLite 기반 WinForms 응용 프로그램으로, 날짜별로 저장된 데이�
 
 ---
 
-<img width="1262" height="773" alt="2" src="https://github.com/user-attachments/assets/4938a7cb-b2b3-4d1b-a422-8f413f2f0d37" />
+![데모 시연](./assets/VIDEO.gif)
 
 ## 📦 프로젝트 개요
 
