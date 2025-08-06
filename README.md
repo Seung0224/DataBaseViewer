@@ -1,11 +1,11 @@
-<img width="1262" height="773" alt="2" src="https://github.com/user-attachments/assets/4938a7cb-b2b3-4d1b-a422-8f413f2f0d37" />
-
 # DataBaseViewr_PROJECT
 
 SQLite 기반 WinForms 응용 프로그램으로, 날짜별로 저장된 데이터베이스를 기반으로
 **그래프 또는 표 형태로 시각화 및 분석**할 수 있는 툴입니다.
 
 ---
+
+<img width="1262" height="773" alt="2" src="https://github.com/user-attachments/assets/4938a7cb-b2b3-4d1b-a422-8f413f2f0d37" />
 
 ## 📦 프로젝트 개요
 
@@ -85,13 +85,6 @@ D:\TEST_MODEL\20250806\History.db
   - ProductInfos (Judge, MaterialInputTime, ProcessingTimeMs)
 
 ---
-
-## 📝 라이선스
-
-> (필요 시 라이선스 정보를 여기에 추가하세요)
-
----
-
 ## 👨‍💻 개발자
 
 - **Seung0224**  
