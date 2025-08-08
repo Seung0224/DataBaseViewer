@@ -1,4 +1,4 @@
-# DataBaseViewr_PROJECT
+# DataBaseViewer
 
 SQLite 기반 WinForms 응용 프로그램으로, 날짜별로 저장된 데이터베이스를 기반으로
 **그래프 또는 표 형태로 시각화 및 분석**할 수 있는 툴입니다.
